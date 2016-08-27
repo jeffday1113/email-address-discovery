@@ -1,8 +1,5 @@
 from emaildiscoverer import EmailDiscoverer
 import argparse
-from bs4 import BeautifulSoup
-import requests
-from urlparse import urlparse
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Program to print all emails found on discoverable pages in a given '
@@ -14,10 +11,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
     assert args.domain_name
     disc = EmailDiscoverer(args.domain_name, args.limit_discovery_distance)
-    #print disc.subdomainBoolean('www.technology.mit.edu')
     disc.discover_emails()
-    # r = requests.get('http://jana.com')
-    # print r.content
-    # soup = BeautifulSoup(r.content, 'html.parser')
-    # for link in soup.find_all('a'):
-    #     print link

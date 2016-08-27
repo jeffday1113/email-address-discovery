@@ -1,7 +1,7 @@
-from collections import deque
-from selenium import webdriver
+from collections                import deque
+from selenium                   import webdriver
 from selenium.common.exceptions import StaleElementReferenceException
-from urlparse import urlparse
+from urlparse                   import urlparse
 import re
 
 
@@ -9,21 +9,21 @@ class EmailDiscoverer(object):
 
     def __init__(self, domain_name, limit_discovery_distance):
         self.domain_name = domain_name
+        self.limit_discovery_distance = limit_discovery_distance
         self.visited_pages = set()
         self.pages_queue = deque()
-        self.pages_queue.append(domain_name)
         self.email_set = set()
-        self.limit_discovery_distance = limit_discovery_distance
+        self.pages_queue.append(domain_name)
 
     def discover_emails(self):
         driver = webdriver.PhantomJS()
         try:
             print "Found these email addresses:"
             counter = 0
+            # While loop that gets the next page to check from the queue, connects to the page, checks for other
+            # discoverable pages, and for emails
             while len(self.pages_queue) > 0:
                 current_page = self.pages_queue.popleft()
-                #print self.limit_discovery_distance
-                #print current_page
                 if current_page not in self.visited_pages:
                     self.visited_pages.add(current_page)
                     current_url = driver.current_url
@@ -40,6 +40,7 @@ class EmailDiscoverer(object):
             driver.quit()
 
     def check_anchor_tags(self, elements, counter):
+        """Checks anchor tags for emails and other links"""
         for elem in elements:
             try:
                 linked_page = elem.get_attribute("href")
@@ -56,6 +57,7 @@ class EmailDiscoverer(object):
                             self.pages_queue.append(EmailDiscoverer.filter_link(linked_page))
 
     def check_text(self, elements):
+        """Searches text of html elements for emails"""
         for elem in elements:
             match = re.search(r'[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}', elem.text)
             if match:
@@ -65,10 +67,18 @@ class EmailDiscoverer(object):
                     self.email_set.add(email)
 
     def check_email_and_print(self, email):
+        """Checks if there is an email in an anchor tag and prints the email and adds it to the set if it is"""
         email = email.replace('mailto:', '')
         if email not in self.email_set:
             print email
             self.email_set.add(email)
+
+    def sub_domain_boolean(self, domain):
+        """Determines if a link is under the domain provided in the input"""
+        if self.domain_name.startswith('www'):
+            return (self.domain_name == domain) or (self.domain_name[self.domain_name.index('.') + 1:] == domain)
+        else:
+            return self.domain_name in domain
 
     @staticmethod
     def is_email(linked_page):
@@ -89,9 +99,3 @@ class EmailDiscoverer(object):
     @staticmethod
     def add_http(domain):
         return 'http://' + domain
-
-    def sub_domain_boolean(self, domain):
-        if self.domain_name.startswith('www'):
-            return (self.domain_name == domain) or (self.domain_name[self.domain_name.index('.') + 1:] == domain)
-        else:
-            return self.domain_name in domain
