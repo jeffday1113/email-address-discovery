@@ -8,6 +8,7 @@ Libraries used (outside of standard python libraries):
 * Selenium (used a web driver dependent on phantomjs)
 
 Installation steps for proper setup to run program:
+
 1. Install selenium library using pip `pip install selenium`
 2. Download phantomjs for the appropriate OS at the following link: http://phantomjs.org/download.html
 3. Unzip the file and place it an appropriate file location
